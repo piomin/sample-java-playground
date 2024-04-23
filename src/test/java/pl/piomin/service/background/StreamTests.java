@@ -4,16 +4,21 @@ import one.util.streamex.StreamEx;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import pl.piomin.services.playground.model.PersonDTO;
+import pl.piomin.services.playground.model.record.Employee;
+import pl.piomin.services.playground.model.record.EmployeeBuilder;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 public class StreamTests {
 
     @Test
-    public void testGrouping() {
+    void testGrouping() {
         Stream<PersonDTO> s1 = Stream.of(
                 PersonDTO.builder().id(1).firstName("John").lastName("Smith").city("London").street("Street1").houseNo("100").build(),
                 PersonDTO.builder().id(2).firstName("Tom").lastName("Hamilton").city("Manchester").street("Street1").houseNo("101").build(),
@@ -28,7 +33,7 @@ public class StreamTests {
     }
 
     @Test
-    public void testPartitioning() {
+    void testPartitioning() {
         Stream<PersonDTO> s1 = Stream.of(
                 PersonDTO.builder().id(1).firstName("John").lastName("Smith").city("London").street("Street1").houseNo("100").build(),
                 PersonDTO.builder().id(2).firstName("Tom").lastName("Hamilton").city("Manchester").street("Street1").houseNo("101").build(),
@@ -40,4 +45,37 @@ public class StreamTests {
         Assertions.assertTrue(m.get(false).size() == 2);
     }
 
+    @Test
+    void testGroupingWithCalculation() {
+        Stream<Employee> s1 = Stream.of(
+                EmployeeBuilder.builder().firstName("AAA").lastName("BBB").position("developer").salary(10000).build(),
+                EmployeeBuilder.builder().firstName("AAB").lastName("BBC").position("architect").salary(15000).build(),
+                EmployeeBuilder.builder().firstName("AAC").lastName("BBD").position("developer").salary(13000).build(),
+                EmployeeBuilder.builder().firstName("AAD").lastName("BBE").position("tester").salary(7000).build(),
+                EmployeeBuilder.builder().firstName("AAE").lastName("BBF").position("tester").salary(9000).build()
+        );
+
+        var m = s1.collect(Collectors.groupingBy(Employee::position, Collectors.summingInt(Employee::salary)));
+        assertEquals(3, m.size());
+        assertEquals(m.get("developer"), 23000);
+    }
+
+    @Test
+    void testImmutability() {
+        var l = Stream.of(null, "Green", "Yellow").toList();
+        assertEquals(3, l.size());
+        assertThrows(UnsupportedOperationException.class, () -> l.add("Red"));
+    }
+
+    @Test
+    void testMutability() {
+        var l = Stream.of(null, "Green", "Yellow").collect(Collectors.toList());
+        l.add("Red");
+        assertEquals(4, l.size());
+    }
+
+    @Test
+    void testUnmodifiable() {
+        assertThrows(NullPointerException.class, () -> Stream.of(null, "Green", "Yellow").collect(Collectors.toUnmodifiableList()));
+    }
 }
