@@ -93,7 +93,7 @@ public class StreamTests {
             es.containsAll(x);
         }
         long end = System.nanoTime();
-        System.out.println(x.getClass() + ": " + (end - beg)/1e9);
+        System.out.println(STR."\{x.getClass()}: \{(end - beg) / 1e9}");
     }
 
     @Test
@@ -109,6 +109,14 @@ public class StreamTests {
             hs.containsAll(x);
         }
         long end = System.nanoTime();
-        System.out.println(x.getClass() + ": " + (end - beg)/1e9);
+        System.out.println(STR."\{x.getClass()}: \{(end - beg) / 1e9}");
+    }
+
+    @Test
+    void reduce() {
+        var listOfNumbers = List.of(1, 2, 3, 4, 5);
+        var sum = listOfNumbers.stream()
+                .reduce(0, Integer::sum);
+        System.out.println(sum);
     }
 }
