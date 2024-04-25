@@ -82,11 +82,10 @@ public class StreamTests {
 
     @Test
     void testEnums() {
-        EnumSet x = EnumSet.of(
+        var x = EnumSet.of(
                 EmployeePosition.SRE,
                 EmployeePosition.ARCHITECT,
                 EmployeePosition.DEVELOPER);
-        int l = EmployeePosition.values().length;
         long beg = System.nanoTime();
         for (int i = 0; i < 100_000_000; i++) {
             var es = EnumSet.allOf(EmployeePosition.class);
@@ -98,11 +97,10 @@ public class StreamTests {
 
     @Test
     void testSet() {
-        Set x = Set.of(
+        var x = Set.of(
                 EmployeePosition.SRE,
                 EmployeePosition.ARCHITECT,
                 EmployeePosition.DEVELOPER);
-        int l = EmployeePosition.values().length;
         long beg = System.nanoTime();
         for (int i = 0; i < 100_000_000; i++) {
             var hs = Set.of(EmployeePosition.values());
@@ -110,5 +108,29 @@ public class StreamTests {
         }
         long end = System.nanoTime();
         System.out.println(x.getClass() + ": " + (end - beg)/1e9);
+    }
+
+    @Test
+    void mergeMapCount() {
+        var map = new HashMap<Integer, Integer>();
+        var nums = List.of(2, 3, 4, 2, 3, 5, 1, 3, 4, 4);
+        nums.forEach(num -> map.merge(num, 1, Integer::sum));
+        assertEquals(5, map.size());
+        assertEquals(map.get(4), 3);
+    }
+
+    @Test
+    void mergeMapSum() {
+        var s1 = List.of(
+                new Employee("AAA", "BBB", "developer", 10000),
+                new Employee("AAB", "BBC", "architect", 15000),
+                new Employee("AAC", "BBD", "developer", 13000),
+                new Employee("AAD", "BBE", "tester", 7000),
+                new Employee("AAE", "BBF", "tester", 9000)
+        );
+        var map = new HashMap<String, Integer>();
+        s1.forEach(emp -> map.merge(emp.position(), emp.salary(), Integer::sum));
+        assertEquals(3, map.size());
+        assertEquals(map.get("developer"), 23000);
     }
 }
