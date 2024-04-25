@@ -46,6 +46,22 @@ public class StreamTests {
     }
 
     @Test
+    void testPartitioningV2() {
+        Stream<Employee> s1 = Stream.of(
+                EmployeeBuilder.builder().firstName("AAA").lastName("BBB").position("developer").salary(10000).build(),
+                EmployeeBuilder.builder().firstName("AAB").lastName("BBC").position("architect").salary(15000).build(),
+                EmployeeBuilder.builder().firstName("AAC").lastName("BBD").position("developer").salary(13000).build(),
+                EmployeeBuilder.builder().firstName("AAD").lastName("BBE").position("tester").salary(7000).build(),
+                EmployeeBuilder.builder().firstName("AAE").lastName("BBF").position("tester").salary(9000).build()
+        );
+
+        var m = s1.collect(Collectors.partitioningBy(emp -> emp.salary() > 10000));
+        assertEquals(2, m.size());
+        assertEquals(m.get(true).size(), 2);
+        assertEquals(m.get(false).size(), 3);
+    }
+
+    @Test
     void testGroupingWithCalculation() {
         Stream<Employee> s1 = Stream.of(
                 EmployeeBuilder.builder().firstName("AAA").lastName("BBB").position("developer").salary(10000).build(),
@@ -58,6 +74,8 @@ public class StreamTests {
         var m = s1.collect(Collectors.groupingBy(Employee::position, Collectors.summingInt(Employee::salary)));
         assertEquals(3, m.size());
         assertEquals(m.get("developer"), 23000);
+        assertEquals(m.get("architect"), 15000);
+        assertEquals(m.get("tester"), 16000);
     }
 
     @Test
@@ -77,7 +95,9 @@ public class StreamTests {
 
     @Test
     void testUnmodifiable() {
-        assertThrows(NullPointerException.class, () -> Stream.of(null, "Green", "Yellow").collect(Collectors.toUnmodifiableList()));
+        assertThrows(NullPointerException.class, () ->
+                Stream.of(null, "Green", "Yellow")
+                        .collect(Collectors.toUnmodifiableList()));
     }
 
     @Test
